@@ -1,5 +1,5 @@
 /*
-Project: Basic surge protector utilizing switch statements
+Project: Basic surge protector utilizing if statements
 Author: Jordan Powell
 */
 
