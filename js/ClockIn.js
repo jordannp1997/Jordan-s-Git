@@ -24,7 +24,7 @@ function clockIn()
 	}
 	else if(clockInAnswer == 'Maybe' || clockInAnswer == "I don't know" || clockInAnswer == 'IDK' || clockInAnswer == "I don't wanna" || clockInAnswer == "I don't want to")
 	{
-		alert('HOW BOUTCHU MAKE YO MUH FUHKIN MIND UP BRUH');
+		alert('HOW BOUTCHU MAKE YA MIND UP BRUH');
 	}
 	else if(clockInAnswer == 'Why you asking me?') 
 	{
