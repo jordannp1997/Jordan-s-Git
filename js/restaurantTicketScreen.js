@@ -1,6 +1,4 @@
 var menuScreen = [];
-var orderIn = [];
-var orderComplete;
 var orderNum = 0;
 var isNewOrder = undefined;
 
