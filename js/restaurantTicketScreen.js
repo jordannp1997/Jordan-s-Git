@@ -31,14 +31,15 @@ function newOrder(drink, meal, side, dessert)
 		menuScreen.push(dessert);
 	}
 
-	cycleOrderNum();
+	cycleOrderElements();
 }
 
-function cycleOrderNum()
+function cycleOrderElements()
 {
 	if(isNewOrder = true)
 	{
 		orderNum++;
+
 	}
 	else
 	{
@@ -51,6 +52,12 @@ function cycleOrderNum()
 function viewOrder()
 {
 	console.log("Order #" + orderNum + ": " + menuScreen);
+	completeOrder();
+}
+
+function completeOrder()
+{
+	menuScreen.length = 0;
 }
 
 newOrder("Coke", "Big Mac", "Fries", "Shake");
