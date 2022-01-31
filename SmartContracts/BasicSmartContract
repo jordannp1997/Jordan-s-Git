@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: GPL-3.0
+
+// Declare version to use
+pragma solidity ^0.8.11;
+
+contract myFirstContract{
+    string stringValue; // Data is stored on the blockchain
+
+    // Constructor function gets called whenever this code is deployed on the blockchain
+    constructor() public{
+        stringValue = "String value on the blockchain!";
+    }
+
+    //Get function returns the string datatyoe
+    // Setting VISABILITY to public
+    // returns(string) lets us know this function will always return a string datatype
+    // View tells us we are not adding any addtional code to this function 
+    function get() public view returns(string){
+        return stringValue;
+    }
+
+    // Set function creates the value assigned
+    function set(string _stringValue) public{
+        stringValue = _stringValue;
+    }
+}
