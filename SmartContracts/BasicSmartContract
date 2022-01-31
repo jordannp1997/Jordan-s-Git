@@ -11,7 +11,7 @@ contract myFirstContract{
         stringValue = "String value on the blockchain!";
     }
 
-    //Get function returns the string datatyoe
+    // Get function returns the string datatyoe
     // Setting VISABILITY to public
     // returns(string) lets us know this function will always return a string datatype
     // View tells us we are not adding any addtional code to this function 
