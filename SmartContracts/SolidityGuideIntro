@@ -1,0 +1,223 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.4.24;
+
+
+// Solidity guide (Introductory)
+// 8/30 2022
+
+// This is an introductory Solidity guide designed for those who have
+// programming experience.
+
+
+// Smart contracts
+// Smart contracts are like classes in other languages
+contract Counter {
+
+    // Unsigned integer (always positive +1)
+    // This is how assignments looks
+    uint public count = 0;
+
+    // Constructor functions are ran once and only once
+    // Good for initiallizing 
+    constructor() public{
+        count = 0;
+    }
+
+    // public allows you to use this function outside of this smart contract "public visibility"
+    function getCount() public view returns(uint){
+        return count;
+    }
+
+    // Write functions change the blockchain and cost gas fees
+    // While read functions dont
+    function incrementCount() public{
+        // count = count + 1;
+        count++; 
+    }
+}
+
+
+// Data types
+contract MyCrontract{
+
+    // State variables
+    // Stored on the blockchain (saved forever)
+
+    //Unsigned integer
+    uint public myUint = 1;
+
+    // You can determine the amount of bytes in the Uint
+    uint256 public myUint256 = 1;
+    uint8 public myUint8 = 1;
+
+    // Signed integers
+    // Can be negative
+    int256 public myInt256 = -1;
+
+    // Strings
+    string public myString = "Hello World";
+
+    // Bytes32 string
+    bytes32 public myBytes32 = "Hello World!";
+
+    // Addresses
+    address public myAddress = 0x222;
+
+    // Local variables exist in functions
+    // Pure says this function will not modify the blockchain 
+    // You must state what the function retrurns
+    function getValue() public pure returns(uint){
+        uint value = 1;
+        return value;
+    }
+
+    // Arrays
+    // You create the array of a data type
+    uint[] public uintArray = [1, 2, 3];
+    string[] public stringArray = ["Wallet", "Chair", "Groceries"];
+    string[] public values;
+
+    // Adding to the array
+    function addValue(string memory _value) public{
+        values.push(_value);
+    }
+
+    // .length shows how many elements are in the array
+    function valueCount() public view returns(uint){
+        return values.length;
+    }
+
+    // 2D arrays
+    uint256[][] public array2D = [[1, 2, 3], [4, 5, 6]];
+}
+
+
+// Mappings
+// Mappings help make key value pairs
+// firstName | Jordan
+// lastName | Powell
+
+contract MyContract{
+    
+    // Mapping declaration
+    // mapping(key => value) myMapping;
+
+    // Example
+    mapping(uint => string) public names;
+
+    // Add data to the mapping
+    constructor() public{
+        names[1] = "Adam";
+        names[2] = "Bruce";
+        names[3] = "Charles";
+    }
+
+    // Structs allow you to store multiple data items
+    // Struct is a data structure
+    struct MyStruct{
+        uint256 myUint256;
+        string myString;
+    }
+
+    // Creating the struct object
+    MyStruct public myStruct = MyStruct(1, "Hello world!");
+
+    // Creating a struct (Data structure)
+    struct Book{
+
+        // Attributes
+        string title;
+        string author;
+    }
+
+    // Creating a database of books on the blockchain (w/ a mapping)
+    // This would be a mapping for database books
+    mapping(uint => Book) public books;
+
+    // Adding a book to the mapping
+    // Pass in data from the struct through parameters 
+    function addBook(uint _id, string memory _title, string memory _author) public {
+        // Assign the attributes of our struct Book to the mapping books id
+        books[_id] = Book(_title, _author);
+    }
+
+    // Rewrite complex functions cleaner this way
+    // function addBook(
+    //     uint _id,
+    //     string memory _title,
+    //     string memory _author
+    // ) public {
+    //     books[_id] = Book(_title, _author);
+    // }
+
+
+    // Nested mappings (mapping of a mapping)
+    // Books to this specific address
+    // address is the key and the mapping to the specific book is the value
+    mapping(address => mapping(uint => Book)) public myBooks;
+
+    // Adding to nested mappings
+    // Adding to a specific address 
+    function addMyBook(
+        uint _id,
+        string memory _title,
+        string memory _author
+    ) public {
+        //msg.sender is the syntax for a specific address
+        myBooks[msg.sender][_id] = Book(_title, _author);
+    }
+
+}
+
+
+// Conditionals and loops
+contract TestContract1{
+
+// if statement syntax
+// if(){}
+
+// We will use this array data
+uint[] public numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
+
+// Check if number is even or odd
+function checkIfEven(uint num) public pure returns(bool){
+    if(num % 2 == 0){
+        return true;
+    }else{
+        return false;
+    }
+   }
+
+    // For loops
+    // Count how many even numbers
+    function countEvenNums() public view returns(uint){
+        uint count = 0;
+            
+        // "We start from zero, we loop through each element in the array
+        // and we increment by 1"
+        for(uint i = 0; i < numbers.length; i++){
+            if(checkIfEven(numbers[i])){
+                count++;
+            }
+            return count;
+        }
+    }
+}
+
+
+// Creating an owner for the smart contract
+contract ContractOwner{
+
+    //Create an owner
+    address public owner;
+
+
+    constructor(){
+        owner = msg.sender;
+    }
+
+    // Check if the current address is the owner
+    function isOwner() public view returns(bool){
+        return(msg.sender == owner);
+    }
+}
