@@ -1,0 +1,70 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+// We will learn:
+    // Inheritance
+    // Factories
+    // Interaction
+
+// Storing a secret message on chain
+// and only allowing a specific person to read the secret
+
+// Ownable contract holds the owner and onlyOwner modifier
+// We will use inheritance for Ownable and MyContract with
+// the key word, is. (Seen on MyContract)
+contract Ownable{
+    address owner;
+
+    // Function modifier requires that the sender is the owner
+    // or the code will not execute.
+    modifier onlyOwner(){
+        require(msg.sender == owner, "Failed, must be sent to the owner.");
+        _;
+    }
+
+    // Constructor creates the owner
+    constructor() {
+        owner = msg.sender;
+    }
+}
+
+// Contract to hold the secret
+contract SecretVault{
+    string secret;
+
+    constructor(string memory _secret) {
+        secret = _secret;
+    }
+
+    // Return function
+    function getSecret() public view returns(string memory){
+        return secret;
+    }
+}
+
+// Factories are contracts that create new contracts
+contract MyContract is Ownable{
+
+    // State variable for reuse
+    address secretVault;
+
+    // 
+    constructor(string memory _secret) {
+        
+        // Creating new contract with the value _secret SecretVault(_secret);
+        SecretVault _secretVault = new SecretVault(_secret);
+
+        // Save the address to reference
+        secretVault = address(_secretVault);
+
+        // Super calls the constructor from the parent contract
+        super;
+    }
+
+    // Return function with modifier onlyOwner
+    function getSecret() public view onlyOwner returns(string memory){
+        
+        // Call a contract within another contract
+        return SecretVault(secretVault).getSecret();
+    }
+}
