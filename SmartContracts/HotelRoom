@@ -1,0 +1,84 @@
+// SPDX-License-Identifier: GPL-3.0
+
+// Declare version to use
+pragma solidity ^0.8.11;
+
+// Our first smart contract
+// We will cover the following concepts:
+    // Sending ether
+    // How to use function modifiers
+    // How to set the visibility of a function
+    // Solidity events
+    // Enums
+
+contract HotelRoom{
+
+    // Event creation
+    event Occupy(address _occupant, uint _value);
+
+    // Payable modifier lets this address recieve crypto
+    address payable public owner;
+
+    // Track if hotel room is vacant or occupied with an enum
+    // enum is a data structure that will never change
+    // Good for statuses or the state of something
+    enum Statuses {Vacant, Occupied}
+
+    // Naming the variable to track the current status
+    Statuses public currentStatus;
+
+    // Tie the address owner with the msg.sender
+    // msg.value is the amount 
+    constructor() {
+        owner = payable(msg.sender);
+
+        // Read the value of the enum
+        currentStatus = Statuses.Vacant;
+    }
+
+    // Function Modifiers help clean up code in the function
+    // Since bookHotelRoom is now payable to onlyWhileVacant
+    // We can delete line 63 all together because we modified the function 
+    modifier onlyWhileVacant{
+
+        // Require function "requires" the condition to be true to
+        // continue executing the next lines of code
+        require(currentStatus == Statuses.Vacant, "Room is occupied.");
+
+        // This returns the function code
+        _;
+    }
+
+    // Check how much it costs
+    modifier costs(uint _amount){
+        require(msg.value >= _amount, "Not enough ether provided.");
+        _;
+    }
+
+    // Pay the hotel
+    function bookHotelRoom() payable public onlyWhileVacant costs(2 ether){
+
+        // Using require to check if the hotel is occupied, and send message
+        require(currentStatus == Statuses.Vacant, "Room is occupied.");
+
+        // Requiring the amount paid is greater than 2 ether
+        require(msg.value >= 2 ether, "Not enough ether provided.");
+
+        // "Transfer money"
+        // owner.transfer(msg.value);
+
+        // Call function is better than .transfer above
+        // Get the status of the transaction
+        // Require prevents any issues with transaction code
+        (bool sent, bytes memory data) = owner.call{value: msg.value}("");
+        require(true);
+
+        // Occupy the hotel room
+        currentStatus = Statuses.Occupied;
+
+        // Emitting an event
+        // Creates a log of the event, good for alerts
+        emit Occupy(msg.sender, msg.value);
+
+    }
+}
