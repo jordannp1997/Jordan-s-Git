@@ -1,0 +1,40 @@
+pragma solidity ^0.8.0;
+
+// Coding a simple NFT w/ open zepplin
+// Must npm install ganache and @openzeppelin/contracts
+
+// Import ERC721
+import "@openzeppelin/contracts/token/ERC721/ERC721.com";
+
+// Inheriting ERC721 
+contract SimpleCollectible is ERC721{
+
+    // Create token ID
+    uint public tokenCounter;
+    
+    // Name and symbol inputs for your token
+    // tokenCounter tracks how many tokens we have
+    constructor() public ERC721("ElementCoin","ECX"){
+        tokenCounter = 0;
+    }
+
+    // Function to mint the collectible
+    function createCollectible(string memory tokenURI) public returns(uint256){
+
+        // Iterates every time we generate a new item
+        uint256 newItemID = tokenCounter;
+
+        // Minting the NFT
+        // Mint a new item, msg.sender is the owner that calls the function
+        _safeMint(msg.sender, newItemID);
+
+        // Set the tokenURI with token ID
+        _setTokenURI(newItemID, tokenURI);
+
+        // Increment token amount
+        tokenCounter++;
+
+        // Return data
+        return newItemID;
+    }
+}
