@@ -1,0 +1,93 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+// Test on koven
+// Must have libraries saved in correct directories
+
+// Import libraries
+//import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+//import "@chainlink/contracts/src/v0.6/VRFConsumerBase.sol";
+
+// Create contract, VRFConsumerBase helps us get the cryptographically random number
+contract AdvancedCollectible is ERC721, VRFConsumerBase{
+
+    uint256 public tokenCounter;
+
+    // Enum for type
+    enum ElementType{AIR, WATER, EARTH, FIRE}
+
+    // Mapping to request to sender
+    // Shows us who sent the request when a request is made
+    mapping(bytes32 => address) public requestIDToSender;
+
+    // Shows tokenURI
+    mapping(bytes32 => string) public requestIDToTokenURI;
+
+    // TokenID to Element, "based off the token ID whats the element of the token"
+    mapping(uint256 => ElementType) public tokenIDToElement;
+
+    // Request ID to token mapping
+    mapping(bytes32 => uint256) public requestIDToTokenID;
+
+    // Needed for the random number
+    bytes32 internal keyHash;
+    uint256 internal fee;
+    uint256 public randomResult;
+
+    // Create constructor pass in parameters for chainlink vrf
+    // VRFCoordinator is the contract that cryptographically
+    // checking that the number we get is truly random
+    // Link token is the oracle gas
+    // Key hash identifies the proper orcacle
+    constructor(address _VRFCoordinator, address _LinkToken, bytes32 _keyhash)
+    public VRFConsumerBase(_VRFCoordinator, _LinkToken)
+    // Pass in a ERC721
+    ERC721("Elements of war", "LMNT"){
+
+        // Set the token counter
+        tokenCounter = 0;
+
+        // Set the key hash
+        keyHash = _keyHash;
+
+        // Calculate fee for chain link oracle
+        fee = 0.1 * 10 ** 18;
+    }
+
+    // Create collectible function
+    // The user provided seed and the key hash is what the vrf
+    // uses to cryptographically guarantee the number is random
+    function createCollectible(string memory tokenURI, uint256 userProvidedSeed)
+    public returns(bytes32){
+        
+        // Request randomness
+        bytes32 requestID = requestRandomness(keyHash, fee, userProvidedSeed);
+
+        // Mapping sender to request
+        requestIDToSender[requestID] = msg.sender;
+
+        // Mapping to request tokenURI
+        requestIDToTokenURI[requestID] = tokenURI;
+    }
+
+    // Fulfill function
+    function fulfillRandomness(bytes32 requestID, uint256 randomNumber) internal override{
+
+        // Create summoner of element fighters
+        address summoner = requestIDToSender[requestID];
+
+        // Get tokenURI
+        string memory tokenURI = requestIDToTokenURI[requestID];
+
+        // Need a new item ID because we want to mint it
+        uint256 newItemID = tokenCounter;
+        _safeMint(summoner, newItemID);
+        _setTokenURI(newItemID, tokenURI);
+
+        // Get the element
+        ElementType elementtype = ElementType(randomNumber % 4);
+
+        // Assign element type to token ID
+        tokenIDToElement[newItemID] = elementtype;
+    }
+}
