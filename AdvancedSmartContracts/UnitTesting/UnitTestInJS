@@ -1,0 +1,111 @@
+// Writing unit tests w/ js
+
+// Importing libraries
+const { expect } = require('chai');
+const { ethers } = require('hardhat');
+
+// Test counter app and functions within it
+describe('Counter' () => {
+
+	let counter;
+
+	// Do this before the functions below run
+	beforeEach(async () => {
+
+		// Retrieve contract from blockchain with ethers
+		const Counter = await ethers.getContractFactory('Counter');
+
+		// Deploy name and initial count
+		counter = await Counter.deploy('My counter', 1);
+	};
+
+	// Setup and test initial deployment
+	describe('Deployment', () => {
+
+		it('Sets the initial count.', async () => {
+		// Fetch the count
+
+		// Get the actual count
+		const count = await counter.count();
+
+		// Check if count equals 1
+		expect(await counter.count()).to.equal(1);
+	});
+
+		it('Sets the initial name.', async () => {
+		// Fetch the name
+
+		// Get the actual count
+		const name = await counter.name();
+
+		// Check if count equals 1
+		expect(name).to.equal(1);
+	});
+
+	// Setup and test increment and decrement functions
+	describe('Increment', () => {
+		let transaction;
+
+		it('Increments the count.', async () => {
+
+			// Wait for this transaction to finish
+			transaction = await counter.increment();
+			await transaction.wait();
+
+			// Check if incremented
+			let count = await counter.count();
+			expect(count).to.equal(2);
+
+			// Check again
+			transaction = await counter.increment();
+			await transaction.wait();
+			expect(await counter.count().to.equal(3));
+		})
+	})
+
+	describe('Decrement', () => {
+
+		it('Decrements the count.', async () => {
+
+			// Wait for this transaction to finish
+			transaction = await counter.decrement();
+			await transaction.wait();
+
+			// Check if decremented
+			let count = await counter.count();
+			expect(count).to.equal(0);
+
+			// We cannot decrement count below 0,
+			// negative numbers will break the code.
+			await expect(counter.decrement()).to.be.reverted;
+
+		})
+	})
+
+	//Setup and test getCount, getName and setName functions
+	describe('Read', () => {
+
+		it('Reads the name public variable.', async () => {
+
+
+			expect(await counter.name()).to.equal("My counter");
+		})
+	})
+
+	describe('Get', () => {
+
+		it('Reads the count from the "getName()" function', async () => {
+
+			expect(await counter.getName()).to.equal("Jordan");
+		})
+	})
+
+	describe('Set', () => {
+
+		it('Updates the name.', async () => {
+			transaction = await counter.setName('New Name');
+			await transaction.wait();
+			expect wait(counter.name()).to.equal('New Name');
+		})
+	})
+});
