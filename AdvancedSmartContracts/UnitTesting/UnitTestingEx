@@ -1,0 +1,55 @@
+pragma solidity ^0.8.0;
+
+// Ultimate solidity guide
+
+// Implementing hardhat framework and test it
+
+contract Counter{
+    // Counter will:
+        // Store numerical value
+        // Increase it, decrease it
+        // Store and set a name
+
+    // CRUD
+        // Create
+        // Read
+        // Update
+        // Delete
+    
+    uint public count;
+    string public name;
+
+    
+    // Set data
+    constructor(string memory _name, uint _count) public{
+        name = _name;
+        count = _count;
+    }
+
+    // Add 1 to our count and return data
+    function increment() public view returns(uint updatedCount){
+        count++;
+        return count;
+    }
+
+    // Subtract 1 to our count and return data
+    function decrement()public returns(uint updatedCount){
+        count--;
+        return count;
+    }
+
+    // Return data
+    function getCount() public view returns(uint){
+        return count;
+    }
+
+    // Return data
+    function getName() public view returns(string memory currentName){
+        return name;
+    }
+
+    // Set name
+    function setName(_setName) public returns(string memory setName){
+        name = _setName;
+    }
+}
