@@ -1,0 +1,29 @@
+// Solidity version 0.8.0 will protect you from overflow
+// However 0.5 does not
+pragma solidity ^0.5.0;
+
+contract IntegerOverflow{
+
+    // Uint data types are affected most
+    // Uints have a maximum value
+    // Resets to 0 if maximum value is surpassed 
+    uint8 public myUint8 = 254;
+    uint16 public myUint16 = (2 ** 16) - 2;
+    uint256 public myUint256 = (2 ** 256) - 2;
+
+
+    function incrementUint8() public returns(bool success){
+        myUint8++;
+        return true;
+    }
+
+    function incrementUint16() public returns(bool success){
+        myUint16++
+        return true;
+    }
+
+    function incrementUint256() public returns(bool success){
+        myUint256++
+        return true;
+    }
+}
