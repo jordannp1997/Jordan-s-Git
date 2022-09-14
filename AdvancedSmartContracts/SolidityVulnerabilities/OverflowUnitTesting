@@ -1,0 +1,53 @@
+// Unit test in js for integer overflow example
+
+const { expect } = require('chai');
+const { expect } = require('hardhat');
+
+describe('IntegerOverflow', () => {
+	let contract;
+
+	beforeEach(async () => {
+		const Overflow = await ethers.getContractFactory('Overflow');
+
+		// Deploy contract
+		contract = await Overflow.deploy();
+	})
+
+	// Uint8
+	describe('uint8', () => {
+		it('Resets the value after 255', async () => {
+			// Incrememnt once
+			await contract.incrementUint8();
+			expect(await contract.myUint8()).to.equal(255);
+
+			// Increment happens, observe overflow back to 0
+			await contract.incrementUint8();
+			expect(await contract.myUint8()).to.equal(0);
+		})
+	})
+
+	// Uint16
+	describe('uint16', () => {
+		it('Resets the value after 2 ^ 16', async () => {
+			// Incrememnt once
+			await contract.incrementUint16();
+			expect(await contract.myUint16()).to.equal((2 ** 16) - 1);
+
+			// Increment happens, observe overflow back to 0
+			await contract.incrementUint16();
+			expect(await contract.myUint16()).to.equal(0);
+		})
+	})
+	
+	// Uint256
+	describe('uint256', () => {
+		it('Resets the value after 2 ^ 256', async () => {
+			// Incrememnt once
+			await contract.incrementUint256();
+
+			// Increment happens, observe overflow back to 0
+			await contract.incrementUint256();
+			expect(await contract.myUint256()).to.equal(0);
+		})
+	})
+})
