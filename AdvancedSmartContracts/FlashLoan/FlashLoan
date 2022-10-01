@@ -1,0 +1,58 @@
+// SPDX-License-Identifier: Unlicense
+pragma solidity ^0.8.0;
+
+import "./Token.sol";
+import "hardhat/console.sol";
+import "@openeppelin/contracts/utils/math/SafeMath.sol";
+// Add reentrancy guard from open zeppelin
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
+interface IReceiver{
+    function receiverTokens(address tokenAddress, uint256 amount) external;
+}
+
+contract FlashLoan is ReentrancyGuard{
+    using SafeMath for uint256;
+
+    Token public token;
+
+    uint256 public poolBalance;
+
+    constructor(address _tokenAddress) {
+        token = Token(_tokenAddress);
+    }
+
+    // Deposit tokens to pool
+    function depositTokens(uint256 _amount) external nonReentrant{
+
+        // Requiring more than 1 token must be deposited
+        require(_amount > 0, "Token amount must be greater than 0!");
+
+        token.transferFrom(msg.sender, address(this), _amount);
+
+        poolBalance = poolBalance.add(_amount);
+    }
+
+    //Flash loan functionality
+    function FlashLoan(uint256 _borrowAmount) external nonReentrant{
+
+        // Adding basic requirements
+        require(_borrowAmount > 0, "Must borrow more than one token.");
+
+        uint256 balanceBefore = token.balanceOf(address(this));
+        require(balanceBefore >= _borrowAmount, "Not enough tokens in the pool.");
+
+        // Ensure that the transfer works
+        assert(poolBalance == balanceBefore);
+
+        // Send tokens to receiver
+        token.transfer(msg.sender, _borrowAmount);
+
+        // Use loan, get paid back
+        IReceiver(msg.sender).IReceiverTokens(address(token), _borrowAmount);
+
+        // Ensure loan was paid back
+        uint256 alanceAfter = token.balanceOf(address(this));
+        require(balanceAfter >= balanceBefore, "Flash loan hasn't been paid back.");
+    }
+}
