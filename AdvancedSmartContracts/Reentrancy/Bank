@@ -1,0 +1,33 @@
+// SPDX-License-Identifier: Unlicensed
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/utils/Address.sol";
+
+// Reentrancy guard prevents this attack from happening
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
+
+contract Bank is ReentrancyGuard{
+
+    // Comes from address library thats imported
+    using Address for address payable;
+
+    mapping(address => uint256) public balanceOf;
+
+    // Deposit ether funds
+    function deposit() external payable {
+
+        // Allows crypto to be send to this smart contract
+        balanceOf[msg.sender] += msg.value;
+    }
+
+    // Withdraw ether funds
+    function withdraw() external nonReentrant{
+
+        uint256 depositedAmount = balanceOf[msg.sender];
+        payable(msg.sender).sendValue(depositedAmount);
+
+        balanceOf[msg.sender] = 0;
+    }
+
+}
