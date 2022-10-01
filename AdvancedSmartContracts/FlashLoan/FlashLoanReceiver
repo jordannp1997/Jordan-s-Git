@@ -1,0 +1,54 @@
+// SPDX-License-Identifier: Unlicense
+pragma solidity ^0.8.0;
+
+
+import "./Token.sol";
+import "hardhat/console.sol";
+import "./FlashLoan.sol";
+
+contract FlashLoanReceiver {
+
+    FlashLoan private pool;
+    address private owner;
+
+    event LoanReceived(address token, uint256 amount);
+
+    // Save the address of the FL contract
+    // Assign owner first and save into the pool
+    constructor(address_poolAddress){
+
+        pool = FlashLoan(_poolAddress);
+        owner = msg.sender;
+
+    }
+
+    function receiveTokens(address _tokenAddress, uint256 _amount) external{
+
+        require(msg.sender == address(pool), "Sender must be pool");
+
+        // Require that we "have the money"
+        require(Token(_tokenAddress).balanceOf(address(this)) == _amount, "Failed to receive loan");
+        
+        // Create event that "receiving the funds happened"
+        emit LoanReceived(_tokenAddress, _amount);
+
+        // Do stuff w/ money..
+        // Write code here to manipulate what happens w/ the money here
+        // Ex. Buy crypto on one exchange and sell on another
+
+        // Use console.log to show values are passed in
+        console.log("_TokenAddress", _tokenAddress, "_amount", _amount);
+
+        // Show we have funds
+        console.log("Show funds: ", Token(_tokenAddress).balanceOf(address(this)));
+
+        // Return funds to pool
+        require(Token(_tokenAddress).transfer(msg.sender, _amount), "Transfer of tokens failed.");
+
+    }
+
+    function executeFlashLoan(uint _amount) extrernal{
+        require(msg.sender == owner, "Only owner can execute flash loan.");
+        pool.flashLoan(_amount);
+    }
+}
