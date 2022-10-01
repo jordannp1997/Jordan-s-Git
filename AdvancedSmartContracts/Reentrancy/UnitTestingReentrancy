@@ -1,0 +1,80 @@
+//Unit testing for reentrancy example
+const { expect } = require('chai');
+const { ethers } = require('hardhat');
+
+const tokens = (n) => {
+	return ethers.utils.parseUnits(n.toString(), 'ether');
+}
+
+ const ether = tokens;
+
+describe('Reentrancy', () => {
+
+	let deployer, bank, attackerContract;
+
+	beforeEach(async () => {
+
+		// Parallel assignment
+		[deployer, user, attacker] = await ethers.getSigners();
+
+		const Bank = await ethers.getContractFactory('Bank', deployer);
+		bank = await Bank.deploy();
+
+		await bank.deposit({value: ethers.utils.parseEther('100')});
+		await bank.connect(user).deposit({value: ethers.utils.parseEther('50')});
+
+		// Deploying attacker contract
+		const Attacker = await ethers.getContractFactory('Attacker', attacker);
+
+		attackerContract = await Attacker.deploy(bank.address);
+
+	});
+
+	describe('Facilitates deposits and withdrawals', () => {
+		it('Accepts deposits', async () => {
+
+			// Check deposit balance
+			const deployerBalance = await bank.balanceOf(deployer.address);
+			expec(deployerBalance).to.equal(ethers.utils.parseEther('100'));
+
+			// Check user balance
+			const userBalance = await bank.balanceOf(user.address);
+			expect(userBalance).to.equal(ethers.utils.parseEther('50'));
+		});
+
+		it('Accepts withdrawals', async () => {
+
+			await bank.withdraw();
+
+			// Check deployer balance
+			const deployerBalance = await bank.balanceOf(deployer.address);
+
+			// Check deployer balance
+			const userBalance = await bank.balanceOf(user.address);
+
+			// Deployer balance should be zero
+			expect(deployerBalance).to.equal(0);
+
+			// User balance should still have some ether in it
+			expect(userBalance).to.equal(ethers.utils.parseEther('50'));
+		})
+
+		it('Allows attacker to drain funds from #withdraw()', async () => {
+
+			// Before attack, get balances
+			console.log('***Before***');
+			console.log(`Banks's balance: ${ethers.utils.formatEther(await ethers.provider.getBalance(bank.address))}`);
+			console.log(`Attacker's balance: ${ethers.utils.formatEther(await ethers.provider.getBalance(attacker.address))}`);
+
+			// Perform attack with 10 ether
+			await attackerContract.attack({value: ethers.utils.parseEther('10')});
+
+			console.log('***After***');
+			console.log(`Banks's balance: ${ethers.utils.formatEther(await ethers.provider.getBalance(bank.address))}`);
+			console.log(`Attacker's balance: ${ethers.utils.formatEther(await ethers.provider.getBalance(attacker.address))}`);
+
+			// Check bank balance has been drained
+			expect(awit ethers.provider.getBalance(bank.address)).to.equal(0);
+		});
+	});
+})
