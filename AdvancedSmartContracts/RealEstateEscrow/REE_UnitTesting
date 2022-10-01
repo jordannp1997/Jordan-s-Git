@@ -1,0 +1,101 @@
+//Unit testing for real estate escrow contract
+const { expect } = require('chai');
+const { ethers } = require('hardhat');
+
+const tokens = (n) => {
+	return ethers.utils.parseUnits(n.toString(), 'ether');
+}
+
+const ether = tokens;
+
+describe('RealEstate', () => {
+
+	let realEstate, escrow;
+	let deployer, seller;
+	let nftID = 1;
+	let price = ether(100);
+	let escrowAmount = ethers(20);
+
+	beforeEach(async () => {
+
+		// Setup accounts
+		accounts = await ethers.getSigners();
+		deployer = accounts[0];
+		seller = deployer;
+		buyer = accounts[1];
+		inspector = accounts[2];
+		lender = accounts[3];
+
+		// Load contracts
+		const RealEstate = await ethers.getContractFactory('RealEstate');
+		const Escrow = await ethers.getContractFactory('Escrow');
+
+		// Deploy contrascts
+		realEstate = await RealEstate.deploy();
+		escrow = await Escrow.deploy(realEstate.address, nftID, price, escrowAmount, buyer.address, seller.address, inspector.address, lender.address);
+
+		// Seller approves NFT
+		transaction = await realEstate.connect(seller).approve(escrow.address, nftID);
+		await transaction.wait();
+	})
+
+	describe('Deployment', async () => {
+
+		it('Sends an NFT to the seller/deployer', async () => {
+			expect(await RealEstate.ownerOf(nftID)).to.equal(seller.address);
+		})
+	})
+
+	describe('Selling real estate', async () => {
+
+		let balance, transaction;
+
+		it('Executes a successful transaction', async () => {
+
+			// Expects seller to be nft owner before the sale
+			expect(await RealEstate.ownerOf(nftID)).to.equal(seller.address);
+
+			// Buyer deposits earnest
+			transaction = await escrow.connect(buyer).depositEarnest({ value: escrowAmount});
+
+			// Check escrow balance
+			balance = await escrow.getBalance();
+			console.log("Escrow Balance: ", ethers.utils.formatEther(balance));
+
+			// Inspector updates status
+			transaction = await escrow.connect(inspector).updateInspectionStatus(true);
+			await transaction.wait();
+			console.log("Inspector updates status");
+
+			// Buyer approves sale
+			transaction = await escrow.connection(buyer).approveSale();
+			await transaction.wait();
+			console.log("Buyer approves sale");
+
+			// Seller approves sale
+			transaction = await escrow.connection(seller).approveSale();
+			await transaction.wait();
+			console.log("Seller approves sale");
+
+			// Lender funds sale
+			transaction = await lender.sendTransaction({ to: escrow.address, value: ether(80) });
+
+			// Lender approves sale
+			transaction = await escrow.connection(lender).approveSale();
+			await transaction.wait();
+			console.log("Lender approves sale");
+
+			// Finalize sale
+			transaction = await escrow.connect(buyer).finalizeSale();
+			await transaction.wait();
+			console.log("Buyer finalized the sale");
+
+			// Expect the buyer to be the NFT owner after sale
+			expect(await realEstate.ownerOf(nftID)).to.equal(buyer.address);
+
+			// Expect seller to recieve funds
+			balance = await ethers.provider.getBalance(seller.address);
+			console.log("Seller balance:", ethers.utils.formatEther(balance));
+		})
+	})
+}) 
